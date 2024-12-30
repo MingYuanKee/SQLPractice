@@ -1,0 +1,22 @@
+with customerProcessed as (
+select customer_id,product_category 
+from customer_contracts 
+join products on products.product_id=customer_contracts.product_id
+group by customer_id,product_category),
+
+ProductCategories AS (
+    SELECT DISTINCT product_category
+    FROM products
+),
+customerProcessedCount as (
+select customer_id,count(distinct product_category) as distinct_cat_count
+--for counting distinct cells in column
+--count(distinct is aggregate so below you need to use 'group by'
+from customerProcessed 
+group by customer_id
+)
+
+select customer_id
+from customerProcessedCount
+where distinct_cat_count = (select count(*) from ProductCategories)
+--for counting records in table
