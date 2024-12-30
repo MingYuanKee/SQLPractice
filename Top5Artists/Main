@@ -1,0 +1,29 @@
+
+WITH artistSong as (
+SELECT songs.song_id,artists.artist_id,artists.artist_name
+from artists 
+join songs on songs.artist_id=artists.artist_id
+),
+artistSongRank as (
+SELECT artistSong.song_id,artistSong.artist_id,artistSong.artist_name,global_song_rank.rank
+from artistSong 
+join global_song_rank on global_song_rank.song_id=artistSong.song_id
+where rank<=10
+),
+newTable as(
+select artist_name,count (artist_name) as numberOfAppearance
+from artistSongRank
+group by artist_name
+ORDER by numberOfAppearance desc
+)
+,
+finalTable as(
+select artist_name,numberOfAppearance, DENSE_RANK() OVER (order by numberOfAppearance desc ) AS artist_rank
+--use DENSE_RANK() if you dont want to skip the numbers
+from newTable
+group by artist_name,numberOfAppearance
+ORDER by artist_rank 
+)
+select artist_name,artist_rank from finalTable
+where artist_rank<=5
+--select artist_name,numberOfAppearance from newTable
